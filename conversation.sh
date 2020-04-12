@@ -64,10 +64,10 @@ for i in $@; do
       else
         echo "$t - $i : $output .. non-200 code. re-trying..."
       fi
-      sleep 1
+      sleep 0.2
     else
       jq . messages/$team_name/$t/$i/$output.json >/dev/null 2>&1
-      if [[ $? -gt 0 ]]; then
+      if [[ $? -gt 0 ]] || [[ ! -s messages/$team_name/$t/$i/$output.json ]]; then
         echo "$t - $i : $output .. invalid json. re-trying..."
       else
         echo "$t - $i : $output .. done"
@@ -76,10 +76,7 @@ for i in $@; do
         latest=$(cat messages/$team_name/$t/$i/$output.json | jq -r '.messages[].ts' | sort -n | head -n 1)
         output=$latest
         newest_done=0
-        if [[ "X$newest" > "X$output" ]]; then
-          newest_done=1
-        fi
-        if [[ "X$newest" == "X$output" ]]; then
+        if [[ "X$newest" > "X$output" ]] || [[ "X$newest" == "X$output" ]]; then
           newest_done=1
         fi
         if [[ $newest_done -gt 0 ]]; then
@@ -104,7 +101,7 @@ for i in $@; do
           fi
         fi
       fi
-      sleep 0.2
+      sleep 0.001
     fi
   done
   echo "$t - $i : done!"
