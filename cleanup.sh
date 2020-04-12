@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for i in messages/*/*/*.json; do
+for i in messages/*/*/*/*.json; do
   if [[ ! -s $i ]]; then
     echo "Removing empty file: $i"
     if [[ "X$1" == "X--run" ]]; then
