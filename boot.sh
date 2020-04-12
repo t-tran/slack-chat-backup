@@ -7,6 +7,7 @@ x_ts=$(gdate +%s.%3N)
 boundary='---------------------------'$(generate-digits 29)
 
 mkdir -p meta/$team_name
+mkdir -p log/$team_name
 echo "Loading my own profile.."
 while [[ true ]]; do
   curl -sv "https://$team_name.slack.com/api/client.boot?_x_id=noversion-$x_ts&_x_version_ts=noversion&_x_gantry=true" \
