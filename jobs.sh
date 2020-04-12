@@ -1,17 +1,17 @@
 #!/bin/bash
 
-source config.sh
+source common.sh
+source "$SLACK_BACKUP_CONFIG"
 
 trap "for i in \$(jobs | awk -F']' '{ print \$1 }' | tr -d '['); do kill %\$i; done" EXIT SIGINT SIGHUP
 
-MAX_THREADS=30
 for t in ims mpims channels; do
   IDS=$(cat meta/boot.json | jq -r '.'$t'[].id')
   for i in $IDS; do
     ./conversation.sh $t $i &
     # max 5 threads
     while [[ true ]]; do
-      RUNNING=$(jobs | wc -l)
+      RUNNING=$(jobs | grep -c 'Running')
       if [[ $RUNNING -lt $MAX_THREADS ]]; then
         break
       fi
@@ -21,12 +21,10 @@ for t in ims mpims channels; do
 done
 
 while [[ true ]]; do
-  RUNNING=$(jobs | wc -l)
+  RUNNING=$(jobs | grep -c 'Running')
   if [[ $RUNNING -eq 0 ]]; then
     break
   fi
+  echo "$RUNNING jobs running.."
   sleep 1
 done
-
-exit
-

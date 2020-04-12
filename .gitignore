@@ -1,4 +1,5 @@
 config.sh
+config-*
 log
 messages
 meta

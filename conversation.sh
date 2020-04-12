@@ -1,6 +1,7 @@
 #!/bin/bash
 
-source config.sh
+source common.sh
+source "$SLACK_BACKUP_CONFIG"
 
 if [[ $# -lt 1 ]]; then
   exit
@@ -9,18 +10,28 @@ fi
 t=$1
 shift
 
+ignored_ids=""
+if [[ "X$t" == "Xims" ]]; then
+  ignored_ids=$ims_ignored
+fi
+if [[ "X$t" == "Xmpims" ]]; then
+  ignored_ids=$mpims_ignored
+fi
+if [[ "X$t" == "Xchannels" ]]; then
+  ignored_ids=$channels_ignored
+fi
+
 for i in $@; do
-  if [[ $# -gt 0 ]]; then
-    matched=0
-    for a in $@; do
-      if [[ "X$i" == "X$a" ]]; then
-        matched=1
-        break
-      fi
-    done
-    if [[ $matched -eq 0 ]]; then
-      continue
+  ignore_matched=0
+  for a in $ignored_ids; do
+    if [[ "X$i" == "X$a" ]]; then
+      ignore_matched=1
+      break
     fi
+  done
+  if [[ $ignore_matched -gt 0 ]]; then
+    echo "### IN IGNORED LIST. SKIPPING $t - $i"
+    continue
   fi
   echo "#### PROCESSING THIS OBJECT: $t - $i"
   #cat meta/boot.json | jq -r '.'$t'[]|select(.id=="'$i'")'
@@ -32,7 +43,6 @@ for i in $@; do
   output=latest
   has_more=true
 
-  echo -n "Downloading.."
   while [[ "X$has_more" == "Xtrue" ]]; do
     x_ts=$(gdate +%s.%3N)
     boundary='---------------------------'$(generate-digits 29)
@@ -50,18 +60,18 @@ for i in $@; do
     if [[ $status_code -ne 200 ]]; then
       # try again
       if [[ $status_code -eq 429 ]]; then
-        echo -n s
+        echo "$t - $i : $output .. rate-limited. re-trying..."
         sleep 3
       else
-        echo -n x
+        echo "$t - $i : $output .. non-200 code. re-trying..."
       fi
       sleep 1
     else
       jq . messages/$t/$i/$output.json >/dev/null 2>&1
       if [[ $? -gt 0 ]]; then
-        echo -n j
+        echo "$t - $i : $output .. invalid json. re-trying..."
       else
-        echo -n .
+        echo "$t - $i : $output .. done"
         newest=$(basename $(ls -1 messages/$t/$i/*.json 2>/dev/null | sort | grep "$output.json" -B1 | head -n 1) .json || echo 0)
         has_more=$(cat messages/$t/$i/$output.json | jq -r .has_more)
         latest=$(cat messages/$t/$i/$output.json | jq -r '.messages[].ts' | sort -n | head -n 1)
@@ -98,6 +108,6 @@ for i in $@; do
       sleep 0.2
     fi
   done
-  echo
+  echo "$t - $i : done!"
 done
 
