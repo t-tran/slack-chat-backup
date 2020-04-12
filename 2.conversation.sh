@@ -2,6 +2,8 @@
 
 source config.sh
 
+trap "for i in \$(jobs | awk -F']' '{ print \$1 }' | tr -d '['); do kill %\$i; done" EXIT SIGINT SIGHUP
+
 MAX_THREADS=30
 for t in ims mpims channels; do
   IDS=$(cat meta/boot.json | jq -r '.'$t'[].id')
