@@ -31,7 +31,19 @@ By default, the program uses config file named `config.sh` in the program direct
 # USAGE
 
 ```
-./run.sh
+./run.sh -h
+Usage: ./run.sh [command] [options]
+
+COMMAND:
+    boot        Download account info and related users profile (meta data)
+    sync        Download all messages (requires existing meta data)
+    all         Perform all commands above in listed order
+    test        Attempt to check system compatibility *DEFAULT*
+
+OPTIONS:
+    -c|--config Path to config file. Default: config.sh
+    -d|--debug  Enable debug. Extremely verbose.
+    -h|--help   Print this help
 ```
 
 # HOW IT WORKS
