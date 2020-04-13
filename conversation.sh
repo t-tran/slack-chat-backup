@@ -71,7 +71,7 @@ for i in $@; do
         echo "$t - $i : $output .. invalid json. re-trying..."
       else
         echo "$t - $i : $output .. done"
-        newest=$(basename $(ls -1 messages/$team_name/$t/$i/*.json 2>/dev/null | sort | grep "$output.json" -B1 | head -n 1) .json || echo 0)
+        newest=$(basename $(ls -1 messages/$team_name/$t/$i/ 2>/dev/null | sort | grep "$output.json" -B1 | head -n 1) .json || echo 0)
         has_more=$(cat messages/$team_name/$t/$i/$output.json | jq -r .has_more)
         latest=$(cat messages/$team_name/$t/$i/$output.json | jq -r '.messages[].ts' | sort -n | head -n 1)
         output=$latest
