@@ -5,11 +5,18 @@ source "$SLACK_BACKUP_CONFIG"
 
 trap "for i in \$(jobs | awk -F']' '{ print \$1 }' | tr -d '['); do kill %\$i; done" EXIT SIGINT SIGHUP
 
+echo "Job manager - start : $MAX_THREADS jobs at a time!"
+
 for t in ims mpims channels; do
   IDS=$(cat meta/$team_name/boot.json | jq -r '.'$t'[].id')
   for i in $IDS; do
+    # check if we can skip archived channels since they should not have any new messages
+    if [[ "X$t" == "Xchannels" ]]; then
+      if [[ $SKIP_ARCHIVED_CHANNELS -gt 0 ]]; then
+        is_archived=$(cat meta/$team_name/boot.json | jq -r $'.channels[]|select(.id=="'$i$'")|.is_archived')
+      fi
+    fi
     ./conversation.sh $t $i &
-    # max 5 threads
     while [[ true ]]; do
       RUNNING=$(jobs | grep -c 'Running')
       if [[ $RUNNING -lt $MAX_THREADS ]]; then
@@ -27,9 +34,11 @@ while [[ true ]]; do
     break
   fi
   if [[ $counter -gt 30 ]]; then
-    echo "$RUNNING jobs running.."
+    echo "Job manager - checkpoint : $RUNNING jobs running.."
     counter=0
   fi
   sleep 1
   let counter=$counter+1
 done
+
+echo "Job manager - finish : All jobs completed!"
