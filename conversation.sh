@@ -30,10 +30,10 @@ for i in $@; do
     fi
   done
   if [[ $ignore_matched -gt 0 ]]; then
-    echo "### IN IGNORED LIST. SKIPPING $t - $i"
+    echo "$t - $i : job skipped!"
     continue
   fi
-  echo "#### PROCESSING THIS OBJECT: $t - $i"
+  echo "$t - $i : job started!"
 
   latest=''
 
@@ -104,6 +104,6 @@ for i in $@; do
       sleep 0.001
     fi
   done
-  echo "$t - $i : done!"
+  echo "$t - $i : job done!"
 done
 
