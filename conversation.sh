@@ -80,6 +80,10 @@ for i in $@; do
           newest_done=1
         fi
         if [[ $newest_done -gt 0 ]]; then
+          if [[ $SYNC_INCREMENTAL -gt 0 ]]; then
+            has_more="false"
+            break
+          fi
           while [[ true ]]; do
             oldest=$(cat messages/$team_name/$t/$i/$newest.json | jq -r '.messages[].ts' | sort -n | head -n 1)
             has_more=$(cat messages/$team_name/$t/$i/$newest.json | jq -r .has_more)
