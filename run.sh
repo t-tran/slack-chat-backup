@@ -54,10 +54,11 @@ export SLACK_BACKUP_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 cd $SLACK_BACKUP_ROOT
 
 export SLACK_BACKUP_CONFIG="config.sh"
+export SLACK_BACKUP_DEBUG=0
 while [[ $1 ]]; do
   case "$1" in
     -c|--config)               SLACK_BACKUP_CONFIG="$2"; shift ;;
-    -d|--debug)                set -x ;;
+    -d|--debug)                SLACK_BACKUP_DEBUG=1; set -x ;;
     -h|--help|*)               usage; exit ;;
   esac
   shift

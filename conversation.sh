@@ -3,12 +3,19 @@
 source common.sh
 source "$SLACK_BACKUP_CONFIG"
 
+if [[ $SLACK_BACKUP_DEBUG -gt 0 ]]; then
+  set -x
+fi
+
 if [[ $# -lt 1 ]]; then
   exit
 fi
 
 t=$1
 shift
+
+x_version_ts=${x_version_ts:-$(date +%s)}
+x_id=${x_id:-$(echo $x_version_ts | md5sum | cut -c -8)}
 
 ignored_ids=""
 if [[ "X$t" == "Xims" ]]; then
@@ -51,7 +58,7 @@ for i in $@; do
     -H 'Accept-Language: en-US,en;q=0.5' \
     -H 'Content-Type: multipart/form-data; boundary='$boundary \
     -H 'Origin: https://app.slack.com' \
-    -H "Cookie: $cookie" \
+    --cookie "cookies/$team_name.jar" \
     --data-binary $'--'$boundary$'\r\nContent-Disposition: form-data; name="channel"\r\n\r\n'$i$'\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="limit"\r\n\r\n42\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="ignore_replies"\r\n\r\ntrue\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="include_pin_count"\r\n\r\ntrue\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="inclusive"\r\n\r\ntrue\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="no_user_profile"\r\n\r\ntrue\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="latest"\r\n\r\n'$latest$'\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="token"\r\n\r\n'$token$'\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="_x_reason"\r\n\r\nmessage-pane/requestHistory\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="_x_mode"\r\n\r\nonline\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="_x_sonic"\r\n\r\ntrue\r\n--'$boundary$'--\r\n' \
     >messages/$team_name/$t/$i/$output.json 2>log/$team_name/$t/$i/$output.log
 
