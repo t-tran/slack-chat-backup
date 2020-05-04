@@ -88,8 +88,8 @@ for i in $@; do
         fi
         if [[ $newest_done -gt 0 ]]; then
           if [[ $SYNC_INCREMENTAL -gt 0 ]]; then
-            has_more="false"
-            break
+            # point $newest to the oldest timestamp to see if there's stuff we haven't loaded
+            newest=$(basename $(ls -1 messages/$team_name/$t/$i/ 2>/dev/null | sort | head -n 1) .json || echo 0)
           fi
           while [[ true ]]; do
             oldest=$(cat messages/$team_name/$t/$i/$newest.json | jq -r '.messages[].ts' | sort -n | head -n 1)
