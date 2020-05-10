@@ -30,9 +30,16 @@ fi
 
 for i in $@; do
   ignore_matched=0
+  cleanup_matched=0
   for a in $ignored_ids; do
     if [[ "X$i" == "X$a" ]]; then
       ignore_matched=1
+      break
+    fi
+  done
+  for a in $chats_cleanup; do
+    if [[ "X$i" == "X$a" ]]; then
+      cleanup_matched=1
       break
     fi
   done
@@ -78,6 +85,37 @@ for i in $@; do
         echo "$t - $i : $output .. invalid json. re-trying..."
       else
         echo "$t - $i : $output .. ok"
+        if [[ $cleanup_matched -gt 0 ]]; then # delete the messages on this channel
+          c_channel=$i
+          touch log/$team_name/$t/$c_channel/purge.done
+          for c_ts in $(jq -r '.messages[].ts' messages/$team_name/$t/$i/$output.json | sort -r); do
+            if [[ $(grep -c "^$c_ts$" log/$team_name/$t/$c_channel/purge.done) -gt 0 ]]; then
+              continue
+            fi
+            x_ts=$(gdate +%s.%3N)
+            boundary='---------------------------'$(generate-digits 29)
+
+            while [[ 1 ]]; do
+              curl -sv "https://$team_name.slack.com/api/chat.delete?_x_id=$x_id-$x_ts&slack_route=$team_id&_x_version_ts=$x_version_ts" \
+                 -H "User-Agent: $USER_AGENT" \
+                 -H 'Accept: */*' \
+                 -H 'Accept-Language: en-US,en;q=0.5' \
+                 -H 'Content-Type: multipart/form-data; boundary='$boundary \
+                 -H 'Origin: https://app.slack.com' \
+                 --cookie "cookies/$team_name.jar" \
+                 --data-binary $'--'$boundary$'\r\nContent-Disposition: form-data; name="channel"\r\n\r\n'$c_channel$'\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="ts"\r\n\r\n'$c_ts$'\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="token"\r\n\r\n'$token$'\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="_x_reason"\r\n\r\nanimateAndDeleteMessageApi\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="_x_mode"\r\n\r\nonline\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="_x_sonic"\r\n\r\ntrue\r\n--'$boundary$'--\r\n' \
+                 >messages/$team_name/$t/$i/purge.json 2>log/$team_name/$t/$i/purge.log
+
+              status_code=$(cat log/$team_name/$t/$i/purge.log | grep "^< HTTP/" | awk '{ print $3 }')
+              if [[ $status_code -eq 200 ]]; then
+                echo "$c_ts" >> log/$team_name/$t/$i/purge.done
+                break
+              else
+                sleep 1
+              fi
+            done
+          done
+        fi
         newest=$(basename $(ls -1 messages/$team_name/$t/$i/ 2>/dev/null | sort | grep "$output.json" -B1 | head -n 1) .json || echo 0)
         has_more=$(cat messages/$team_name/$t/$i/$output.json | jq -r .has_more)
         latest=$(cat messages/$team_name/$t/$i/$output.json | jq -r '.messages[].ts' | sort -n | head -n 1)
