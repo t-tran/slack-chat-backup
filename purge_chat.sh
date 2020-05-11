@@ -30,7 +30,7 @@ for f in messages/$team_name/*/$c_channel/*.json; do
          -H 'Origin: https://app.slack.com' \
          --cookie "cookies/$team_name.jar" \
          --data-binary $'--'$boundary$'\r\nContent-Disposition: form-data; name="channel"\r\n\r\n'$c_channel$'\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="ts"\r\n\r\n'$c_ts$'\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="token"\r\n\r\n'$token$'\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="_x_reason"\r\n\r\nanimateAndDeleteMessageApi\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="_x_mode"\r\n\r\nonline\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="_x_sonic"\r\n\r\ntrue\r\n--'$boundary$'--\r\n' \
-         >messages/$team_name/$t/$c_channel/purge.json 2>log/$team_name/$t/$c_channel/purge.log
+         >log/$team_name/$t/$c_channel/purge.json 2>log/$team_name/$t/$c_channel/purge.log
       status_code=$(cat log/$team_name/$t/$c_channel/purge.log | grep "^< HTTP/" | awk '{ print $3 }')
       if [[ $status_code -eq 200 ]]; then
         echo "$c_ts" >> log/$team_name/$t/$c_channel/purge.done
