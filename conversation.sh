@@ -122,6 +122,7 @@ for i in $@; do
           for a in $(jq -r '.messages[]|select(.files!=null)|.files[]|select(.url_private_download!=null)|.url_private_download' messages/$team_name/$t/$i/$output.json); do
             p=$(echo $a | awk -F'slack.com/files-pri/' '{ print $2 }')
             mkdir -p files/$team_name/$(dirname $p)
+            mkdir -p log/$team_name/$(dirname $p)
             if [[ -f files/$team_name/$p ]]; then
               continue
             fi
@@ -132,8 +133,8 @@ for i in $@; do
                  -H 'Accept-Language: en-US,en;q=0.5' \
                  -H 'Origin: https://app.slack.com' \
                  --cookie "cookies/$team_name.jar" \
-                 >files/$team_name/$p 2>log/$team_name/download_files.log
-              let status_code=$(cat log/$team_name/download_files.log | grep "^< HTTP/" | awk '{ print $3 }')0/10
+                 >files/$team_name/$p 2>log/$team_name/$(dirname $p)/download_files.log
+              let status_code=$(cat log/$team_name/$(dirname $p)/download_files.log | grep "^< HTTP/" | awk '{ print $3 }')0/10
               if [[ $status_code -eq 200 ]]; then
                 break
               else
