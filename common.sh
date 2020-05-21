@@ -1,6 +1,6 @@
 #!/bin/bash
 
-mkdir -p meta messages log
+mkdir -p meta messages files log
 
 function generate-digits() {
   local S=''

@@ -14,6 +14,8 @@ fi
 t=$1
 shift
 
+download_files=${DOWNLOAD_FILES:-1}
+
 x_version_ts=${x_version_ts:-$(date +%s)}
 x_id=${x_id:-$(echo $x_version_ts | md5sum | cut -c -8)}
 
@@ -109,6 +111,30 @@ for i in $@; do
               status_code=$(cat log/$team_name/$t/$i/purge.log | grep "^< HTTP/" | awk '{ print $3 }')
               if [[ $status_code -eq 200 ]]; then
                 echo "$c_ts" >> log/$team_name/$t/$i/purge.done
+                break
+              else
+                sleep 1
+              fi
+            done
+          done
+        fi
+        if [[ $download_files -gt 0 ]]; then
+          for a in $(jq -r '.messages[]|select(.files!=null)|.files[]|select(.url_private_download!=null)|.url_private_download' messages/$team_name/$t/$i/$output.json); do
+            p=$(echo $a | awk -F'slack.com/files-pri/' '{ print $2 }')
+            mkdir -p files/$team_name/$(dirname $p)
+            if [[ -f files/$team_name/$p ]]; then
+              continue
+            fi
+            while [[ 1 ]]; do
+              curl -sv "$a" \
+                 -H "User-Agent: $USER_AGENT" \
+                 -H 'Accept: */*' \
+                 -H 'Accept-Language: en-US,en;q=0.5' \
+                 -H 'Origin: https://app.slack.com' \
+                 --cookie "cookies/$team_name.jar" \
+                 >files/$team_name/$p 2>log/$team_name/download_files.log
+              let status_code=$(cat log/$team_name/download_files.log | grep "^< HTTP/" | awk '{ print $3 }')0/10
+              if [[ $status_code -eq 200 ]]; then
                 break
               else
                 sleep 1
