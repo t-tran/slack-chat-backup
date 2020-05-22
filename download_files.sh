@@ -8,7 +8,7 @@ if [[ $SLACK_BACKUP_DEBUG -gt 0 ]]; then
   set -x
 fi
 
-trap "for i in \$(jobs | awk -F']' '{ print \$1 }' | tr -d '['); do kill %\$i; done; exit" SIGINT SIGHUP
+trap "for i in \$(jobs -p); do kill \$i; done; exit" SIGINT SIGHUP
 
 echo "Job manager - start : $MAX_THREADS jobs at a time!"
 

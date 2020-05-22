@@ -3,7 +3,7 @@
 source common.sh
 source "$SLACK_BACKUP_CONFIG"
 
-trap "for i in \$(jobs | awk -F']' '{ print \$1 }' | tr -d '['); do kill %\$i; done; exit" EXIT SIGINT SIGHUP
+trap "for i in \$(jobs -p); do kill \$i; done; exit" EXIT SIGINT SIGHUP
 
 echo "Job manager - start : $MAX_THREADS jobs at a time!"
 
