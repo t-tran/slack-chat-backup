@@ -121,6 +121,9 @@ for i in $@; do
         if [[ $download_files -gt 0 ]]; then
           for a in $(jq -r '.messages[]|select(.files!=null)|.files[]|select(.url_private_download!=null)|.url_private_download' messages/$team_name/$t/$i/$output.json); do
             p=$(echo $a | awk -F'slack.com/files-pri/' '{ print $2 }')
+            if [[ -z $p ]]; then
+              continue
+            fi
             mkdir -p files/$team_name/$(dirname $p)
             mkdir -p log/$team_name/$(dirname $p)
             if [[ -f files/$team_name/$p ]]; then
