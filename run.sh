@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source common.sh
+
 function usage() {
   cat <<EOF
 Usage: $0 [command] [options]
@@ -20,9 +22,6 @@ EOF
 function system_check() {
   uname=$(uname)
   required_commands="curl gdate jq"
-  if [[ "X$uname" == "XLinux" ]]; then
-    echo "You may want to set this alias: 'gdate=date'"
-  fi
   if [[ "X$uname" == "XDarwin" ]]; then
     echo "You may want to brew install: 'coreutils' and 'jq'"
   fi
