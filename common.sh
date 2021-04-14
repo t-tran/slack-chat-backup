@@ -9,3 +9,12 @@ function generate-digits() {
   done
   echo $S
 }
+
+if [ "$(uname)" = "Linux" ] &&
+    ! command -v gdate >/dev/null &&
+    command -v date >/dev/null; then
+
+    gdate() {
+        date "$@"
+    }
+fi
