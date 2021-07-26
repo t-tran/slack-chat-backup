@@ -5,8 +5,7 @@ Backup your Slack chat messages (direct messages, group messages, joined channel
 
 * BASH (`/bin/bash`)
 * jq
-* GNU's date and name it `gdate`
-  - Linux: `alias gdate=date`
+* GNU's date
   - MacOS: `brew install coreutils`
 
 # INSTALLATION
