@@ -31,6 +31,7 @@ boundary='---------------------------'$(generate-digits 29)
 mkdir -p meta/$team_name
 mkdir -p log/$team_name
 echo "Loading my own profile.."
+attempt=1
 while [[ true ]]; do
   curl -sv "https://$team_name.slack.com/api/client.boot?_x_id=noversion-$x_ts&_x_version_ts=noversion&_x_gantry=true" \
   -H "User-Agent: $USER_AGENT" \
@@ -53,9 +54,13 @@ while [[ true ]]; do
     fi
     sleep 1
   else
-    jq .self meta/$team_name/boot.json
-    if [[ $? -gt 0 ]]; then
+    if [[ $(jq .self meta/$team_name/boot.json) == "null" ]]; then
       echo "Invalid json result. Re-trying.."
+      if [[ $attempt -gt 3 ]]; then
+        echo "Max retries exceeded. Maybe a bad cookie jar at 'cookies/$team_name.jar'? Try deleting it!"
+        exit 1
+      fi
+      let attempt=$attempt+1
     else
       break
     fi

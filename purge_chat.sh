@@ -14,7 +14,7 @@ for f in messages/$team_name/*/$c_channel/*.json; do
   echo "reading $f"
   t=$(basename $(dirname $(dirname $f)))
   touch log/$team_name/$t/$c_channel/purge.done
-  for c_ts in $(jq -r '.messages[].ts' $f); do
+  for c_ts in $(jq -r '.messages[].ts' $f | sort); do
     if [[ $(grep -c "^$c_ts$" log/$team_name/$t/$c_channel/purge.done) -gt 0 ]]; then
       echo -n -
       continue
