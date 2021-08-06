@@ -34,13 +34,14 @@ echo "Loading my own profile.."
 attempt=1
 while [[ true ]]; do
   curl -sv "https://$team_name.slack.com/api/client.boot?_x_id=noversion-$x_ts&_x_version_ts=noversion&_x_gantry=true" \
+  -X 'POST' \
   -H "User-Agent: $USER_AGENT" \
   -H 'Accept: */*' -H 'Accept-Language: en-US,en;q=0.5' \
   -H 'Content-Type: multipart/form-data; boundary='$boundary \
   -H 'Origin: https://app.slack.com' \
-  -H 'Cache-Control: max-age=0' \
+  -H "Host: ${team_name}.slack.com" \
   --cookie "cookies/$team_name.jar" \
-  --data-binary $'--'$boundary$'\r\nContent-Disposition: form-data; name="token"\r\n\r\n'$token$'\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="only_self_subteams"\r\n\r\n1\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="flannel_api_ver"\r\n\r\n4\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="include_min_version_bump_check"\r\n\r\n1\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="version_ts"\r\n\r\n'$x_version_ts$'\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="_x_reason"\r\n\r\ndeferred-data\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="_x_sonic"\r\n\r\ntrue\r\n--'$boundary$'--\r\n' \
+  --data-binary $'--'$boundary$'\r\nContent-Disposition: form-data; name="token"\r\n\r\n'$token$'\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="only_self_subteams"\r\n\r\n1\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="flannel_api_ver"\r\n\r\n4\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="include_min_version_bump_check"\r\n\r\n1\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="version_ts"\r\n\r\n'$x_version_ts$'\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="build_version_ts"\r\n\r\n'$x_version_ts$'\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="_x_reason"\r\n\r\ndeferred-data\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="_x_sonic"\r\n\r\ntrue\r\n--'$boundary$'--\r\n' \
   >meta/$team_name/boot.json 2>log/$team_name/boot.log
 
   status_code=$(cat log/$team_name/boot.log | grep "^< HTTP/" | awk '{ print $3 }')
