@@ -61,13 +61,8 @@ for i in $@; do
   while [[ "X$has_more" == "Xtrue" ]]; do
     x_ts=$(gdate +%s.%3N)
     boundary='---------------------------'$(generate-digits 29)
-    curl -sv "https://$team_name.slack.com/api/conversations.history?_x_id=$x_id-$x_ts&slack_route=$team_id&_x_version_ts=$x_version_ts" \
-    -H "User-Agent: $USER_AGENT" \
-    -H 'Accept: */*' \
-    -H 'Accept-Language: en-US,en;q=0.5' \
+    make-request "https://$team_name.slack.com/api/conversations.history?_x_id=$x_id-$x_ts&slack_route=$team_id&_x_version_ts=$x_version_ts" \
     -H 'Content-Type: multipart/form-data; boundary='$boundary \
-    -H 'Origin: https://app.slack.com' \
-    --cookie "cookies/$team_name.jar" \
     --data-binary $'--'$boundary$'\r\nContent-Disposition: form-data; name="channel"\r\n\r\n'$i$'\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="limit"\r\n\r\n42\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="ignore_replies"\r\n\r\ntrue\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="include_pin_count"\r\n\r\ntrue\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="inclusive"\r\n\r\ntrue\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="no_user_profile"\r\n\r\ntrue\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="latest"\r\n\r\n'$latest$'\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="token"\r\n\r\n'$token$'\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="_x_reason"\r\n\r\nmessage-pane/requestHistory\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="_x_mode"\r\n\r\nonline\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="_x_sonic"\r\n\r\ntrue\r\n--'$boundary$'--\r\n' \
     >messages/$team_name/$t/$i/$output.json 2>log/$team_name/$t/$i/$output.log
 
@@ -98,13 +93,8 @@ for i in $@; do
             boundary='---------------------------'$(generate-digits 29)
 
             while [[ 1 ]]; do
-              curl -sv "https://$team_name.slack.com/api/chat.delete?_x_id=$x_id-$x_ts&slack_route=$team_id&_x_version_ts=$x_version_ts" \
-                 -H "User-Agent: $USER_AGENT" \
-                 -H 'Accept: */*' \
-                 -H 'Accept-Language: en-US,en;q=0.5' \
+              make-request "https://$team_name.slack.com/api/chat.delete?_x_id=$x_id-$x_ts&slack_route=$team_id&_x_version_ts=$x_version_ts" \
                  -H 'Content-Type: multipart/form-data; boundary='$boundary \
-                 -H 'Origin: https://app.slack.com' \
-                 --cookie "cookies/$team_name.jar" \
                  --data-binary $'--'$boundary$'\r\nContent-Disposition: form-data; name="channel"\r\n\r\n'$c_channel$'\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="ts"\r\n\r\n'$c_ts$'\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="token"\r\n\r\n'$token$'\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="_x_reason"\r\n\r\nanimateAndDeleteMessageApi\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="_x_mode"\r\n\r\nonline\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="_x_sonic"\r\n\r\ntrue\r\n--'$boundary$'--\r\n' \
                  >messages/$team_name/$t/$i/purge.json 2>log/$team_name/$t/$i/purge.log
 
@@ -130,12 +120,7 @@ for i in $@; do
               continue
             fi
             while [[ 1 ]]; do
-              curl -sv "$a" \
-                 -H "User-Agent: $USER_AGENT" \
-                 -H 'Accept: */*' \
-                 -H 'Accept-Language: en-US,en;q=0.5' \
-                 -H 'Origin: https://app.slack.com' \
-                 --cookie "cookies/$team_name.jar" \
+              make-request "$a" \
                  >files/$team_name/$p 2>log/$team_name/$(dirname $p)/download_files.log
               let status_code=$(cat log/$team_name/$(dirname $p)/download_files.log | grep "^< HTTP/" | awk '{ print $3 }')0/10
               if [[ $status_code -eq 200 ]]; then
