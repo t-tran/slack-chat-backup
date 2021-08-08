@@ -29,12 +29,7 @@ for c in messages/$team_name/*/*; do
         continue
       fi
       while [[ 1 ]]; do
-        curl -sv "$a" \
-           -H "User-Agent: $USER_AGENT" \
-           -H 'Accept: */*' \
-           -H 'Accept-Language: en-US,en;q=0.5' \
-           -H 'Origin: https://app.slack.com' \
-           --cookie "cookies/$team_name.jar" \
+        make-request "$a" \
            >files/$team_name/$p 2>log/$team_name/$c/download_files.log
         let status_code=$(cat log/$team_name/$c/download_files.log | grep "^< HTTP/" | awk '{ print $3 }')0/10
         if [[ $status_code -eq 200 ]]; then
