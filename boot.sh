@@ -32,10 +32,15 @@ echo "Loading my own profile.."
 attempt=1
 while [[ true ]]; do
   make-request "https://$team_name.slack.com/api/client.boot?_x_id=noversion-$x_ts&_x_version_ts=noversion&_x_gantry=true" \
-  -X 'POST' \
-  -H 'Content-Type: multipart/form-data; boundary='$boundary \
-  -H "Host: ${team_name}.slack.com" \
-  --data-binary $'--'$boundary$'\r\nContent-Disposition: form-data; name="token"\r\n\r\n'$token$'\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="only_self_subteams"\r\n\r\n1\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="flannel_api_ver"\r\n\r\n4\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="include_min_version_bump_check"\r\n\r\n1\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="version_ts"\r\n\r\n'$x_version_ts$'\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="build_version_ts"\r\n\r\n'$x_version_ts$'\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="_x_reason"\r\n\r\ndeferred-data\r\n--'$boundary$'\r\nContent-Disposition: form-data; name="_x_sonic"\r\n\r\ntrue\r\n--'$boundary$'--\r\n' \
+  --header "Host: ${team_name}.slack.com" \
+  --form token="${token}" \
+  --form only_self_subteams=1 \
+  --form flannel_api_ver=4 \
+  --form include_min_version_bump_check=1 \
+  --form version_ts="${x_version_ts}" \
+  --form build_version_ts="${x_version_ts}" \
+  --form _x_reason=deferred-data \
+  --form _x_sonic=true \
   >meta/$team_name/boot.json 2>log/$team_name/boot.log
 
   status_code=$(cat log/$team_name/boot.log | grep "^< HTTP/" | awk '{ print $3 }')
