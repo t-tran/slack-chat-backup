@@ -10,11 +10,21 @@ fi
 
 c_channel=$1
 
-for f in messages/$team_name/*/$c_channel/*.json; do
+START_FROM=${START_FROM:-$(cat log/$team_name/*/$c_channel/purge.done 2>/dev/null | sort -r | head -n 1 | awk -F. '{ print $1 }')} # unix timestamp
+
+for f in $(ls -r messages/$team_name/*/$c_channel/); do
+  f_ts=$(basename $f | awk -F. '{ print $1 }')
+  if [[ "X$f_ts" != "Xlatest" ]]; then
+    continue
+  fi
+  if [[ $f_ts -lt $START_FROM ]]; then
+    break
+  fi
+  f="messages/$team_name/*/$c_channel/$f"
   echo "reading $f"
   t=$(basename $(dirname $(dirname $f)))
   touch log/$team_name/$t/$c_channel/purge.done
-  for c_ts in $(jq -r '.messages[].ts' $f | sort); do
+  for c_ts in $(jq -r '.messages[].ts' $f | sort -r); do
     if [[ $(grep -c "^$c_ts$" log/$team_name/$t/$c_channel/purge.done) -gt 0 ]]; then
       echo -n -
       continue
