@@ -6,14 +6,14 @@
 
 # slack related variables
 export team_name
-team_name=
+team_name="<your-team-name>"
 export team_id
-team_id=
+team_id="<your-team-id>"
 
 export cookie
-cookie=
+cookie="<your-cookie>"
 export token
-token=
+token="<your-token>"
 
 export ims_ignored
 ims_ignored=""

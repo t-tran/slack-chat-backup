@@ -9,13 +9,13 @@ Usage: $0 [command] [options]
 COMMAND:
     boot        Download account info and related users profile (meta data)
     sync        Download all messages (requires existing meta data)
-    all         Perform all commands above in listed order
     test        Attempt to check system compatibility *DEFAULT*
+    all         Perform all commands above in listed order
 
 OPTIONS:
     -c|--config Path to config file. Default: config.sh
     -d|--debug  Enable debug. Extremely verbose.
-    -h|--help   Print this help
+    -h|--help   Print this help.
 EOF
 }
 
@@ -71,6 +71,6 @@ fi
 case "$comm" in
   boot)       ./boot.sh ;;
   sync)       ./jobs.sh ;;
-  all)        ./boot.sh ; ./jobs.sh ;;
   test)       system_check ;;
+  all)        system_check; ./boot.sh ; ./jobs.sh ;;
 esac
